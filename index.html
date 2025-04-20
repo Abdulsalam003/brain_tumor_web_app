@@ -1,0 +1,345 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Brain Tumor Detection</title>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <style>
+    * {
+      box-sizing: border-box;
+      font-family: 'Poppins', sans-serif;
+    }
+    body {
+      background-color: #f8f9fa;
+      color: #212529;
+      margin: 0;
+      padding: 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding-top: 30px;
+    }
+    h1 {
+      font-size: 2rem;
+      margin-bottom: 1rem;
+      color: #343a40;
+    }
+    .container {
+      background: white;
+      padding: 2rem;
+      border-radius: 12px;
+      box-shadow: 0 0 12px rgba(0, 0, 0, 0.1);
+      max-width: 500px;
+      width: 90%;
+      text-align: center;
+    }
+    .upload-area {
+      margin-bottom: 1rem;
+    }
+    input[type="file"] {
+      display: none;
+    }
+    .choose-file-button {
+      display: inline-block;
+      padding: 10px 20px;
+      background-color: #007bff;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      font-weight: bold;
+      cursor: pointer;
+      transition: background-color 0.3s ease;
+      margin-bottom: 1rem;
+    }
+    .choose-file-button:hover {
+      background-color: #0056b3;
+    }
+    button {
+      padding: 10px 20px;
+      border: none;
+      border-radius: 8px;
+      background-color: #ff0008;
+      color: white;
+      font-weight: bold;
+      cursor: pointer;
+      transition: background-color 0.3s ease;
+    }
+    button:hover {
+      background-color: #0056b3;
+    }
+    .preview-container {
+      margin-top: 1rem;
+      background-color: #f1f1f1;
+      padding: 20px;
+      border-radius: 12px;
+      border: 1px dashed #dee2e6;
+    }
+    img {
+      max-width: 100%;
+      border-radius: 10px;
+      display: block;
+      margin: 0 auto;
+    }
+    .result {
+      margin-top: 1.5rem;
+      font-size: 1.1rem;
+    }
+    .highlight {
+      font-weight: 600;
+      color: #28a745;
+    }
+    .confidence {
+      color: #17a2b8;
+    }
+    .no-image {
+      font-size: 1rem;
+      color: #adb5bd;
+    }
+    .explanation {
+      margin-top: 1rem;
+      font-size: 1rem;
+      color: #6c757d;
+      font-style: italic;
+    }
+    .download-button {
+      margin-top: 20px;
+      padding: 10px 20px;
+      background-color: #28a745;
+      color: white;
+      font-weight: bold;
+      border-radius: 8px;
+      cursor: pointer;
+    }
+    .splash-screen {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: #007bff;
+  color: white;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+  animation: fadeOut 1s ease-out forwards;
+  animation-delay: 2.5s;
+}
+
+.splash-logo {
+  width: 100px;
+  height: 100px;
+  margin-bottom: 20px;
+}
+
+.splash-title {
+  font-size: 2rem;
+  font-weight: bold;
+}
+
+/* Fade-out animation */
+@keyframes fadeOut {
+  to {
+    opacity: 0;
+    visibility: hidden;
+  }
+}
+.splash-subtitle {
+  margin-top: 10px;
+  font-size: 0.9rem;
+  color: #e0e0e0;
+}
+
+.splash-dev {
+  font-size: 0.9rem;
+  color: #f8f9fa;
+  margin-top: 5px;
+}
+.footer {
+  background-color: #343a40;
+  color: white;
+  padding: 10px;
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  display: flex;
+  justify-content: flex-start;
+  align-items: center;
+  font-size: 0.9rem;
+}
+
+.footer-text,
+.footer-hidden-text {
+  margin: 0 10px; /* Adds some spacing between the text items */
+}
+
+.footer-hidden-text {
+  display: none; /* Hides the additional text by default */
+}
+  </style>
+</head>
+<body>
+<!-- Splash Screen -->
+<div id="splashScreen" class="splash-screen">
+    <img src="images.jpeg" alt="App Logo" class="splash-logo">
+    <h1 class="splash-title">Brain Tumor Detection</h1>
+    <p class="splash-subtitle">© 2025 All Rights Reserved</p>
+    <p class="splash-dev">
+      DAMO, AMINA MAMUDA<br>
+      Department of Computer Science<br>
+      March, 2025<br>
+      Matric No: 20/508CSCE/025
+    </p>
+  </div>
+    
+  
+ <!-- Main App Content -->
+<div id="mainApp" class="container" style="display: none;">
+    <h1>🧠 Brain Tumor Detection</h1>
+    <div class="upload-area">
+      <label class="choose-file-button" for="imageUpload">Choose Image</label>
+      <input type="file" id="imageUpload" accept="image/*" />
+    </div>
+    <p>Upload an MRI Scan to Detect Tumor<p>
+    <div class="preview-container" id="previewContainer">
+      <p id="noImageText" class="no-image">No image selected yet.</p>
+      <img id="previewImage" style="display: none;" alt="Image Preview"/>
+    </div>
+    <br/>
+      <button onclick="uploadImage()">Analyze Image</button>
+    <div class="result" id="predictionResult"></div>
+    <div class="explanation" id="predictionExplanation"></div>
+    <button class="download-button" id="downloadBtn" style="display: none;" onclick="downloadPDF()">Download PDF</button>
+    <button class="download-button" onclick="viewHistory()">📜 View History</button>
+    <div id="historyContainer" style="margin-top: 20px; display: none; background-color: #e9ecef; padding: 15px; border-radius: 10px; text-align: left;"></div>
+  
+    <!-- Footer -->
+<footer class="footer">
+    <p class="footer-text">Developed by Damo Amina Mamuda | Department of Computer Science | March 2025</p>
+  </footer>
+  
+  </div>
+    
+
+  <script>
+    const imageUpload = document.getElementById('imageUpload');
+    const previewImage = document.getElementById('previewImage');
+    const noImageText = document.getElementById('noImageText');
+    const predictionResult = document.getElementById('predictionResult');
+    const predictionExplanation = document.getElementById('predictionExplanation');
+    const downloadBtn = document.getElementById('downloadBtn');
+
+    imageUpload.addEventListener('change', function () {
+      const file = this.files[0];
+      if (file) {
+        const reader = new FileReader();
+        reader.onload = function (e) {
+          previewImage.src = e.target.result;
+          previewImage.style.display = 'block';
+          noImageText.style.display = 'none';
+        };
+        reader.readAsDataURL(file);
+      } else {
+        previewImage.style.display = 'none';
+        noImageText.style.display = 'block';
+      }
+    });
+
+    async function uploadImage() {
+      const file = imageUpload.files[0];
+      if (!file) {
+        alert('Please select an image first.');
+        return;
+      }
+
+      const formData = new FormData();
+      formData.append('image', file);
+
+      predictionResult.innerHTML = "⏳ Analyzing...";
+
+      try {
+        const response = await fetch('http://127.0.0.1:5000/predict', {
+          method: 'POST',
+          body: formData
+        });
+
+        const data = await response.json();
+
+        predictionResult.innerHTML = `
+          <div>🧠 <span class="highlight">Prediction:</span> ${data.predicted_class}</div>
+          <div>📊 <span class="confidence">Confidence:</span> ${data.confidence}</div>
+        `;
+
+        predictionExplanation.innerHTML = `
+          <div><strong>Explanation:</strong> ${data.explanation}</div>
+        `;
+
+        downloadBtn.style.display = 'inline-block';
+
+      } catch (error) {
+        predictionResult.innerHTML = "❌ Error analyzing image. Please try again.";
+        console.error('Error:', error);
+      }
+    }
+
+    function downloadPDF() {
+      const { jsPDF } = window.jspdf;
+      const doc = new jsPDF();
+      doc.setFontSize(18);
+      doc.text('Brain Tumor Classification Report', 20, 20);
+      if (previewImage.src) {
+        doc.addImage(previewImage.src, 'JPEG', 20, 30, 150, 150);
+      }
+      const predictionText = predictionResult.textContent.trim();
+      const explanationText = predictionExplanation.textContent.trim();
+      doc.setFontSize(14);
+      doc.text(`Prediction: ${predictionText}`, 20, 200);
+      doc.text(`Explanation: ${explanationText.replace("Explanation:", "").trim()}`, 20, 220);
+      doc.save('prediction_report.pdf');
+    }
+
+    async function viewHistory() {
+      const historyContainer = document.getElementById('historyContainer');
+      historyContainer.style.display = 'block';
+      historyContainer.innerHTML = "⏳ Loading history...";
+      try {
+        const response = await fetch('http://127.0.0.1:5000/history');
+        const history = await response.json();
+        if (history.length === 0) {
+          historyContainer.innerHTML = "<p>No predictions have been made yet.</p>";
+          return;
+        }
+        let historyHTML = "<h3>🕘 Prediction History:</h3><ul style='padding-left: 20px;'>";
+        history.reverse().forEach((entry, index) => {
+          historyHTML += `
+            <li style="margin-bottom: 10px;">
+              <strong>#${history.length - index}</strong>: 
+              <span style="color: #007bff;">${entry.predicted_class}</span> 
+              (Confidence: <span style="color: #17a2b8;">${entry.confidence}</span>)<br/>
+              <em style="color: #6c757d;">${entry.explanation}</em>
+            </li>
+          `;
+        });
+        historyHTML += "</ul>";
+        historyContainer.innerHTML = historyHTML;
+      } catch (error) {
+        historyContainer.innerHTML = "<p>❌ Failed to load history.</p>";
+        console.error('Error fetching history:', error);
+      }
+    }
+  </script>
+  <script>
+    window.addEventListener('load', function () {
+      setTimeout(() => {
+        document.getElementById('splashScreen').style.display = 'none';
+        document.getElementById('mainApp').style.display = 'block';
+      }, 3000); // time in ms
+    });
+  </script>
+  
+</body>
+</html>
